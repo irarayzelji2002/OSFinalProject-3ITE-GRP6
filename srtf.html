@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRTF Scheduling</title>
+
+  <!--Bootstrap CSS CDN-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="site.css">
+  <!--Google Font-Roboto-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+  <!--FONT AWESOME-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+  <a href="index.html" class="btn btn-light exit" style="text-decoration:none; color:#262626; border-radius:50%; position:absolute; transform: translate(50%,-60%); z-index:1;">
+    <i class="fa-solid fa-house" style="color:#262626; margin-top:8px; margin-bottom:8px;"></i>
+  </a>
+
+  <div class="my-5">
+    <h2 class="text-center title" style="color:white; filter: drop-shadow(0 2mm 4mm rgb(0, 0, 0));">Preemptive Scheduling</h2>
+    <h5 class="text-center" style="color:white; filter: drop-shadow(0 2mm 4mm rgb(0, 0, 0)); font-weight:600;">Shortest Remaining Time First (SRTF)</h5>
+  </div>
+
+  <div class="row justify-content-center align-items-center g-0 mb-5">
+    <div class="card col-lg-5 col-sm-8">
+      <div class="content-holder">
+        <div class="mb-3 content" id="content-1" data-id='1'>
+          <label for="noOfProcesses" class="form-label">Input no. of processes (2-9)</label>
+          <span class="errorSpan"></span>
+          <input type="text" class="form-control" id="noOfProcesses">
+        </div>
+        
+        <div class="mb-3 content" id="content-2" data-id='2'>
+          <label for="arrivalTime" class="form-label">Input individual arrival time</label>
+          <div id="newFieldsAT"></div>
+          <!--<span class="errorSpan"></span>
+          <input type="text" class="form-control" id="arrivalTime">-->
+        </div>
+        
+        <div class="mb-3 content" id="content-3" data-id='3'>
+          <label for="burstTime" class="form-label">Input individual burst time</label>
+          <div id="newFieldsBT"></div>
+          <!--<span class="errorSpan"></span>
+          <input type="text" class="form-control" id="burstTime">-->
+        </div>
+        <button type="button" class="btn btn-secondary back" style="float:left;">Back</button>
+        <button type="button" class="btn btn-secondary next" style="float:right;">Next</button>
+      </div>
+
+      <div class="end" id="content-end" data-id='4' style="text-align:center;">
+        <div id="newFieldsResult" class="table-responsive" style="margin-bottom:20px;"></div>
+        <button type="button" class="btn btn-secondary retry">Retry</button>
+        <a href="index.html" class="btn btn-secondary exit" style="text-decoration:none; color:#262626;">Exit</a>
+      </div>
+    </div>
+  </div>
+
+  <!--Bootstrap JavaScript CDN-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+  <script>   
+    var counter = 1;
+    $('.back').hide();
+    $('#content-2').hide();
+    $('#content-3').hide();
+    $('.end').hide();
+    console.log('counter is '+counter)
+    var arrivalTime = [];
+    var ErrATCount = 0;
+    var burstTime = [];
+    var ErrBTCount = 0;
+    $('body').on('click', '.next', function() { 
+        $('.content').hide();
+        var noOfProcesses;
+        var newFieldsAT;
+        var newFieldsBT;
+
+        //VALIDATE BEFORE GOING TO NEXT
+        if(counter==1) {
+          $('#content-1').show();
+          noOfProcesses = document.getElementById('noOfProcesses').value;
+          var errorSpan = $('#noOfProcesses').parent().find('.errorSpan');
+          console.log(noOfProcesses);
+          console.log(noOfProcesses%1 != 0);
+          if(noOfProcesses=="") {
+            errorSpan.text('This field is required');
+          } else if((noOfProcesses%1 != 0) || (noOfProcesses<2 || noOfProcesses>9)){
+            errorSpan.text('Must be from integer 2 to 9');
+          } else { //correct info
+            counter++;
+            $('#content-1').hide();
+            $('#content-2').show();
+            $('.back').show();
+            addFieldsAT(noOfProcesses);
+          }
+        } else if(counter==2) {
+          $('#content-2').show();
+          $('.back').show();
+          
+          validateAT();
+          
+        } else if(counter==3) {
+          $('#content-3').show();
+          $('.back').show();
+          
+          validateBT();
+        }
+        
+        //SRTF COMPUTATION & RESULT
+        if(counter > 3) {
+          $('.content-holder').hide();
+          $('.end').show();
+          var card = document.querySelector('.card')
+          card.classList.remove('col-lg-5');
+          card.classList.remove('col-sm-8');
+          card.classList.add('col-10');
+        };
+    });
+
+    $('body').on('click', '.back', function() { 
+      counter--;
+      console.log('counter: '+counter);
+      $('.content').hide();
+      if(counter<2) {
+        $('#content-1').show();
+        $('.back').hide();
+        removeFieldsAT();
+      } else if(counter==2) {
+        $('#content-2').show();
+        removeFieldsBT();
+      } else if(counter==3) {
+        $('#content-3').show();
+      }
+
+      if(counter<3){
+        $('.next').removeClass("btn-info")
+        $('.next').addClass("btn-secondary")
+        document.querySelector('.next').innerText = 'Next'
+      }
+    });
+
+    $('body').on('click', '.retry', function() { 
+      $('.back').hide();
+      $('.end').hide();
+      $('.content-holder').show();
+      $('#content-1').show();
+      $('.next').removeClass("btn-info")
+      $('.next').addClass("btn-secondary")
+      document.querySelector('.next').innerText = 'Next'
+      document.getElementById('noOfProcesses').value = ""
+      document.querySelector('.errorSpan').innerHTML = ""
+      removeFieldsAT();
+      removeFieldsBT();
+      removeFieldsResult();
+      counter = 1
+    });
+
+    var n = document.getElementById('noOfProcesses').value;
+    console.log('n is '+n)
+    var label = $('<label for="arrivalTime" class="form-label"></label>');
+    var span = $('<span class="errorSpan"></span>');
+    var input = $('<input type="text" class="form-control" style="margin-bottom:10px;"/>');
+    newFieldsAT = $('');
+    newFieldsBT = $('');
+    //ADDING, REMOVING< VALIDATING AT FIELDS
+    function addFieldsAT(n) {
+      for (i = newFieldsAT.length; i < n; i++) {
+        label = $('<label for="arrivalTime" class="form-label">AT'+(i+1)+'</label>');
+        span = $('<span class="errorSpan errorSpanAT'+(i+1)+'"></span>');
+        input = $('<input type="text" class="form-control" style="margin-bottom:10px;" id="arrivalTime'+(i+1)+'"/>');
+        var newLabel = label.clone();
+        var newSpan = span.clone();
+        var newInput = input.clone();
+        newFieldsAT = newFieldsAT.add(newLabel);
+        newFieldsAT = newFieldsAT.add(newSpan);
+        newFieldsAT = newFieldsAT.add(newInput);
+        newLabel.appendTo('#newFieldsAT');
+        newSpan.appendTo('#newFieldsAT');
+        newInput.appendTo('#newFieldsAT');
+      }
+    }
+    function removeFieldsAT() {
+      var removeField = newFieldsAT.slice(0).remove();
+      newFieldsAT = newFieldsAT.not(removeField);
+    }
+
+    function validateAT() {
+      var n = ((newFieldsAT.length)/3)
+      console.log('is empty: '+arrivalTime==[])
+      ErrATCount = 0;
+      if(arrivalTime==[]) {
+        console.log('here')
+        arrivalTime = [n+1];
+      }
+      
+      for (i = 0; i < n ; i++) {
+        arrivalTime[i] = document.getElementById('arrivalTime'+(i+1)).value;
+        var errorSpan = $('#arrivalTime'+(i+1)).parent().find('.errorSpanAT'+(i+1));
+        if(arrivalTime[i]=="") {
+          errorSpan.text('This field is required');
+          ErrATCount++;
+        } else if(isNaN(arrivalTime[i]+"")){
+          errorSpan.text('Must be a number');
+          ErrATCount++;
+        } else {
+          errorSpan.text('');
+        }
+      }
+
+      if(ErrATCount == 0){ //correct info
+        counter++;
+        $('#content-2').hide();
+        $('#content-3').show();
+        $('.next').removeClass("btn-secondary");
+        $('.next').addClass("btn-info");
+        document.querySelector('.next').innerText = 'Submit';
+        addFieldsBT(n);
+      }
+
+      console.log(arrivalTime)
+      console.log('ErrATCount: '+ErrATCount)
+    }
+
+    //ADDING, REMOVING< VALIDATING BT FIELDS
+    function addFieldsBT(n) {
+      for (i = newFieldsBT.length; i < n; i++) {
+        label = $('<label for="burstTime" class="form-label">BT'+(i+1)+'</label>');
+        span = $('<span class="errorSpan errorSpanBT'+(i+1)+'"></span>');
+        input = $('<input type="text" class="form-control" style="margin-bottom:10px;" id="burstTime'+(i+1)+'"/>');
+        var newLabel = label.clone();
+        var newSpan = span.clone();
+        var newInput = input.clone();
+        newFieldsBT = newFieldsBT.add(newLabel);
+        newFieldsBT = newFieldsBT.add(newSpan);
+        newFieldsBT = newFieldsBT.add(newInput);
+        newLabel.appendTo('#newFieldsBT');
+        newSpan.appendTo('#newFieldsBT');
+        newInput.appendTo('#newFieldsBT');
+      }
+    }
+    function removeFieldsBT() {
+      var removeField = newFieldsBT.slice(0).remove();
+      newFieldsBT = newFieldsBT.not(removeField);
+    }
+
+    function validateBT() {
+      var n = ((newFieldsBT.length)/3)
+      console.log('is empty: '+burstTime==[])
+      ErrBTCount = 0;
+      if(burstTime==[]) {
+        console.log('here')
+        burstTime = [n+1];
+      }
+      
+      for (i = 0; i < n ; i++) {
+        burstTime[i] = document.getElementById('burstTime'+(i+1)).value;
+        var errorSpan = $('#burstTime'+(i+1)).parent().find('.errorSpanBT'+(i+1));
+        if(burstTime[i]=="") {
+          errorSpan.text('This field is required');
+          ErrBTCount++;
+        } else if(isNaN(burstTime[i]+"")){
+          errorSpan.text('Must be a number');
+          ErrBTCount++;
+        } else {
+          errorSpan.text('');
+        }
+      }
+
+      if(ErrBTCount == 0){ //correct info
+        counter++;
+        $('#content-3').hide();
+        $('.content-holder').hide();
+        $('.end').show();
+        $('.next').removeClass("btn-info");
+        $('.next').addClass("btn-secondary");
+        document.querySelector('.next').innerText = 'Next';
+        addFieldsResult(n);
+      }
+
+      console.log(burstTime)
+      console.log('ErrBTCount: '+ErrBTCount)
+    }
+
+    //COMPUTE SRTF & ADD TABLE
+    function addFieldsResult(n) {
+      const div = document.getElementById("newFieldsResult"),
+      tbl = document.createElement('table');
+      tbl.classList.add('table');
+      tbl.classList.add('table-hover');
+      tbl.classList.add('table-light');
+      tbl.style.borderRadius = '20px';
+      tbl.style.marginBottom = '0';
+      var thead;
+      var tbody = tbl.createTBody();
+      var tfoot;
+      var tr;
+      for (let i = 0; i < (n+2); i++) {
+        if(i === 0) {
+          thead = tbl.createTHead();
+          tr = thead.insertRow();
+        }
+        if (i != 0 && i < n+1) {
+          tr = tbody.insertRow();
+        }
+        if(i === n+1) {
+          tfoot = tbl.createTFoot();
+          tr = tfoot.insertRow();
+        }
+        
+        for (let j = 0; j < 5; j++) {
+          
+          if (i < n+1) {
+            const td = tr.insertCell();
+            td.style.color = 'black';
+            if (i === 0 && j === 0) {
+              td.appendChild(document.createTextNode(`Process ID`));
+              td.style.fontWeight = '600';
+              td.style.borderTop = '0';
+            } else if (i === 0 && j === 1) {
+              td.appendChild(document.createTextNode(`Arrival Time`));
+              td.style.fontWeight = '600';
+              td.style.borderTop = '0';
+            } else if (i === 0 && j === 2) {
+              td.appendChild(document.createTextNode(`Burst Time`));
+              td.style.fontWeight = '600';
+              td.style.borderTop = '0';
+            } else if (i === 0 && j === 3) {
+              td.appendChild(document.createTextNode(`Waiting Time`));
+              td.style.fontWeight = '600';
+              td.style.borderTop = '0';
+            } else if (i === 0 && j === 4) {
+              td.appendChild(document.createTextNode(`Turnaround Time`));
+              td.style.fontWeight = '600';
+              td.style.borderTop = '0';
+            } else if (i!= n+1 && j === 0) {
+              td.appendChild(document.createTextNode(`${i}`));
+            }else if (j === 1) {
+              td.appendChild(document.createTextNode(`${arrivalTime[i-1]}`));
+            } else if (j === 2) {
+              td.appendChild(document.createTextNode(`${burstTime[i-1]}`));
+            } else if (j === 3) {
+              td.appendChild(document.createTextNode(`WT for P${i}`)); //add computation of WT here
+            } else if (j === 4) {
+              td.appendChild(document.createTextNode(`TT for P${i}`)); //add computation of TT here
+            } else {
+              td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
+            }
+          } else {
+            if (i === n+1 && j === 0) {
+              const td = tr.insertCell();
+              td.style.color = 'black';
+              td.appendChild(document.createTextNode(`Average`));
+              td.setAttribute('colSpan', '3');
+              td.style.fontWeight = '600';
+            } else if (i === n+1 && j < 3) {
+              const td = tr.insertCell();
+              td.style.color = 'black';
+              if (j === 1) {
+                td.appendChild(document.createTextNode(`Ave WT`)); //add computation of AWT here
+              } else if (j === 2) {
+                td.appendChild(document.createTextNode(`Ave TT`)); //add computation of ATT here
+              } else {
+              td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
+              }
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      div.appendChild(tbl);
+    }
+    function removeFieldsResult() {
+      var newFieldsResult = document.getElementById('newFieldsResult')
+      newFieldsResult.innerHTML = '';
+    }
+  </script>
+</body>
+</html>

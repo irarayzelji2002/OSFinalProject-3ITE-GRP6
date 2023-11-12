@@ -1,0 +1,96 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    color: white;
+}
+
+body {
+    width: 100%;
+    min-height: 93.8vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),url(bg.jpg);
+    overflow-x: hidden;
+}
+
+label {
+    font-weight: 600;
+    margin: 0;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.17);
+    border-radius: 16px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10.5px);
+    -webkit-backdrop-filter: blur(10.5px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-left: 100px;
+    padding-right: 100px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+}
+
+h4, h5, h6 {
+    font-weight: 700;
+}
+
+th, td {
+    padding-bottom: 10px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+th {
+    font-weight: 600;
+}
+
+td {
+    font-weight: 400;
+}
+
+.errorSpan {
+    font-size: 15px;
+    color: #FF5C5C;
+    filter: drop-shadow(0mm 0mm 2mm rgb(0, 0, 0));
+    display: block;
+    margin-bottom: 10px;
+}
+
+.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary:target {
+    color: #262626;
+    background-color: #999999;
+    border: var(--bs-btn-border-width) solid #999999;
+}
+
+.btn-secondary:not(:disabled):not(:disabled):active { /*when clicked*/
+    background-color: #999999;
+    border: var(--bs-btn-border-width) solid #999999;
+}
+
+.btn-secondary {
+    background-color: #BCBCBC;
+    border-color: none;
+    color: #262626;
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
+    border: var(--bs-btn-border-width) solid #BCBCBC;
+}
+
+@media screen and (max-width: 1395px) {
+    .card {
+      padding-left: 70px;
+      padding-right: 70px;
+    }
+}
+@media screen and (max-width: 799px) {
+    .title {
+        padding-top:40px;
+    }
+}
