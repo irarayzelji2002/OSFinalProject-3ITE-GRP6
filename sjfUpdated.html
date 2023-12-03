@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SJF Scheduling</title>
+
+  <!--Bootstrap CSS CDN-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="site.css">
+  <!--Google Font-Roboto-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+  <!--FONT AWESOME-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+ 
+<a href="index.html" class="btn btn-light exit" style="text-decoration:none; color:#262626; border-radius:50%; position:absolute; transform: translate(50%,-60%); z-index:1;">
+    <i class="fa-solid fa-house" style="color:#262626; margin-top:8px; margin-bottom:8px;"></i>
+</a>
+  <div class="container mt-5">
+    <h2 class="text-center title" style="color:white; filter: drop-shadow(0 2mm 4mm rgb(0, 0, 0));">Non-Preemptive Scheduling</h2>
+<h5 class="text-center" style="color:white; filter: drop-shadow(0 2mm 4mm rgb(0, 0, 0)); font-weight:600;">Shortest Job First (SJF)</h5>
+    
+    <!-- Input Section -->
+    <div id="inputSection">
+      <form id="inputForm">
+        <div class="form-group">
+          <label for="noOfProcesses">Enter the number of processes:</label>
+          <input type="number" class="form-control" id="noOfProcesses" min="2" max="9" required oninput="errorMessage()">
+          <div id="error" class="text-danger"></div>
+        </div>
+        <div id="inputFields"></div>
+        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Submit</button>
+      
+  <!--For some reason even when everything is disabled, when you click the page, the input for arrival time and burst time still appears
+      
+  -->
+        
+        <script>
+          function errorMessage() {
+            var error = document.getElementById("error");
+            var noOfProcesses = document.getElementById("noOfProcesses").value;
+      
+            if (isNaN(noOfProcesses) || noOfProcesses < 2 || noOfProcesses > 9) {
+              // Display error message
+              error.textContent = "Please enter a valid number between 2 and 9";
+              error.style.color = "red";
+              // Disable form submission
+              document.getElementById("submitBtn").disabled = true;
+            } else {
+              // Clear error message
+              error.textContent = "";
+              // Enable form submission
+              document.getElementById("submitBtn").disabled = false;
+            }
+          }
+        </script>
+    </div>
+      
+    <!-- Result Section (Initially Hidden) -->
+    <div id="resultSection" class="mt-5" style="display: none;">
+      <h4 class="mt-4 mb-3">Results:</h4>
+      <div id="resultTable"></div>
+      <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <!--Bootstrap JavaScript CDN-->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+  <script>
+    // Function to add input fields for arrival and burst times
+    function addInputFields(n) {
+      let inputFields = '';
+      for (let i = 1; i <= n; i++) {
+        inputFields += `
+          <div class="content-2">
+            <label for="arrivalTime${i}">Enter Arrival Time for Process P${i}:</label>
+            <input type="number" class="form-control" id="arrivalTime${i}" required>
+          </div>
+          <div class="content-2">
+            <label for="burstTime${i}">Enter Burst Time for Process P${i}:</label>
+            <input type="number" class="form-control" id="burstTime${i}" required>
+          </div>
+        `;
+      }
+      $('#inputFields').html(inputFields);
+    }
+
+    // Function to compute and display SJF results
+    function computeSJFResults(A) {
+      let total = 0;
+      let avg_wt, avg_tat;
+      let n = A.length;
+
+      // Sort processes based on burst time
+      A.sort((a, b) => a[1] - b[1]);
+
+      A[0][2] = 0;
+      for (let i = 1; i < n; i++) {
+        A[i][2] = 0;
+        for (let j = 0; j < i; j++) {
+          A[i][2] += A[j][1];
+        }
+        total += A[i][2];
+      }
+
+      avg_wt = total / n;
+      total = 0;
+
+      let resultTable = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Process</th>
+              <th>Burst Time</th>
+              <th>Waiting Time</th>
+              <th>Turnaround Time</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (let i = 0; i < n; i++) {
+        A[i][3] = A[i][1] + A[i][2];
+        total += A[i][3];
+        resultTable += `
+          <tr>
+            <td>P${A[i][0]}</td>
+            <td>${A[i][1]}</td>
+            <td>${A[i][2]}</td>
+            <td>${A[i][3]}</td>
+          </tr>
+        `;
+      }
+
+      resultTable += `
+          </tbody>
+        </table>
+        <p>Average Waiting Time: ${avg_wt}</p>
+        <p>Average Turnaround Time: ${total / n}</p>
+      `;
+
+      $('#resultTable').html(resultTable);
+      // Show the result section
+      $('#inputSection').hide();
+      $('#resultSection').show();
+    }
+
+    // Form submission event
+    $('#inputForm').submit(function (e) {
+      e.preventDefault();
+      let n = $('#noOfProcesses').val();
+      let A = [];
+
+      for (let i = 1; i <= n; i++) {
+        let arrivalTime = parseInt($(`#arrivalTime${i}`).val());
+        let burstTime = parseInt($(`#burstTime${i}`).val());
+        A.push([i, burstTime, arrivalTime, 0]);
+      }
+
+      computeSJFResults(A);
+    });
+
+    // Reset form event
+    function resetForm() {
+      $('#inputSection').show();
+      $('#resultSection').hide();
+      $('#inputForm')[0].reset();
+      $('#inputFields').html('');
+      $('#resultTable').html('');
+    }
+
+    // Change event for the number of processes input
+    $('#noOfProcesses').change(function () {
+      let n = $(this).val();
+      addInputFields(n);
+    });
+    
+  </script>
+  </form>
+</body>
+</html>
