@@ -38,21 +38,22 @@
         <div class="mb-3 content" id="content-2" data-id='2'>
           <label for="arrivalTime" class="form-label">Input individual arrival time</label>
           <div id="newFieldsAT"></div>
-          <!--<span class="errorSpan"></span>
-          <input type="text" class="form-control" id="arrivalTime">-->
         </div>
         
         <div class="mb-3 content" id="content-3" data-id='3'>
           <label for="burstTime" class="form-label">Input individual burst time</label>
           <div id="newFieldsBT"></div>
-          <!--<span class="errorSpan"></span>
-          <input type="text" class="form-control" id="burstTime">-->
         </div>
         <button type="button" class="btn btn-secondary back" style="float:left;">Back</button>
         <button type="button" class="btn btn-secondary next" style="float:right;">Next</button>
       </div>
 
       <div class="end" id="content-end" data-id='4' style="text-align:center;">
+        <div id="ganttChartTitle" style="margin-bottom:0px; display:block; margin:auto;"></div>
+        <div style="display:inline-block; margin:auto;">
+          <div id="ganttChart" class="table-responsive" style="margin-bottom:20px;"></div>
+        </div>
+
         <div id="newFieldsResult" class="table-responsive" style="margin-bottom:20px;"></div>
         <button type="button" class="btn btn-secondary retry">Retry</button>
         <a href="index.html" class="btn btn-secondary exit" style="text-decoration:none; color:#262626;">Exit</a>
@@ -208,6 +209,9 @@
         } else if(isNaN(arrivalTime[i]+"")){
           errorSpan.text('Must be a number');
           ErrATCount++;
+        } else if((arrivalTime[i]%1 != 0)) {
+          errorSpan.text('Must be an integer');
+          ErrATCount++;
         } else {
           errorSpan.text('');
         }
@@ -267,6 +271,12 @@
         } else if(isNaN(burstTime[i]+"")){
           errorSpan.text('Must be a number');
           ErrBTCount++;
+        } else if((burstTime[i]%1 != 0)) {
+          errorSpan.text('Must be an integer');
+          ErrBTCount++;
+        } else if((burstTime[i] == 0)) {
+          errorSpan.text('Burst time can not be 0');
+          ErrBTCount++;
         } else {
           errorSpan.text('');
         }
@@ -280,16 +290,167 @@
         $('.next').removeClass("btn-info");
         $('.next').addClass("btn-secondary");
         document.querySelector('.next').innerText = 'Next';
-        addFieldsResult(n);
+        computeSJFResults();
       }
 
       console.log(burstTime)
       console.log('ErrBTCount: '+ErrBTCount)
     }
 
-    //COMPUTE SRTF & ADD TABLE
-    function addFieldsResult(n) {
-      const div = document.getElementById("newFieldsResult"),
+    function computeSJFResults() {
+      let n = $('#noOfProcesses').val();
+      let A = [];
+
+      for (let i = 1; i <= n; i++) {
+        let arrivalTime = parseInt($(`#arrivalTime${i}`).val());
+        let burstTime = parseInt($(`#burstTime${i}`).val());
+        A.push({
+          processId: i,
+          arrivalTime: arrivalTime,
+          burstTime: burstTime,
+          waitingTime: 0,
+          turnaroundTime: 0
+        });
+      }
+
+      const noOfProcesses = A.length;
+      let currentTime = 0;
+      const ganttChart = [];
+      let totalWaitingTime = 0;
+      let totalTurnaroundTime = 0;
+      let avgWaitingTime = 0;
+      let avgTurnaroundTime = 0;
+      
+      // SORTING OF PROCESSES
+      const burstTimes = [];
+
+      for (let i = 0; i < noOfProcesses+1; i++) {
+        let shortestProcessIndex = -1;
+        let shortestBurstTime = Infinity;
+
+        // Find the process with the shortest burst time that has already arrived
+        for (let j = 0; j < noOfProcesses; j++) {
+          if (A[j].arrivalTime <= currentTime && A[j].burstTime > 0 && A[j].burstTime < shortestBurstTime) {
+            shortestProcessIndex = j;
+            shortestBurstTime = A[j].burstTime;
+          }
+        }
+
+        if (shortestProcessIndex !== -1) {
+          // Update Gantt Chart and currentTime
+          const processId = A[shortestProcessIndex].processId;
+          ganttChart.push({ process: "P" + A[shortestProcessIndex].processId, startTime: currentTime, endTime: currentTime + A[shortestProcessIndex].burstTime});
+          currentTime += A[shortestProcessIndex].burstTime;
+          
+          burstTimes.push(A[shortestProcessIndex].burstTime); // Store burst times
+          A[shortestProcessIndex].burstTime = 0; // Mark the process as completed
+        } else {
+          // No process has arrived yet, find the next arrival time
+          let nextArrivalTime = Infinity;
+          for (let j = 0; j < noOfProcesses; j++) {
+            if (A[j].arrivalTime > currentTime && A[j].arrivalTime < nextArrivalTime) {
+              nextArrivalTime = A[j].arrivalTime;
+            }
+          }
+
+          if (nextArrivalTime !== Infinity) {
+            // Update currentTime to the next arrival time
+            currentTime = nextArrivalTime;
+          }
+        }
+      }
+
+      // Add a final entry for the completion time
+      ganttChart.push({ process: "Completion", startTime: currentTime, endTime: currentTime });
+      console.log(ganttChart);
+      console.log(A);
+
+      // COMPUTING WAITING TIME & TURNAROUND TIME WITH GANTT CHART
+      for (let i = 0; i < ganttChart.length - 1; i++) {
+        let processId = ganttChart[i].process;
+        let startTime = ganttChart[i].startTime;
+        let endTime = ganttChart[i].endTime;
+
+        if (processId !== "Completion") {
+          let process = A.find((p) => "P" + p.processId === processId);
+          process.burstTime = burstTimes[i];
+          process.turnaroundTime = endTime - process.arrivalTime;
+          process.waitingTime = Math.max(0, process.turnaroundTime - process.burstTime);
+          
+        }
+        console.log(processId + " | " + startTime);
+      }
+      console.log(A);
+
+      // COMPUTE AVERAGE WAITING & TURNAROUND TIME
+      for (let i = 0; i < noOfProcesses; i++) {
+        A[i].waitingTime = A[i].waitingTime || 0;
+        A[i].turnaroundTime = A[i].turnaroundTime || 0;
+        totalWaitingTime += A[i].waitingTime;
+        totalTurnaroundTime += A[i].turnaroundTime;
+      }
+      avgWaitingTime = totalWaitingTime / noOfProcesses;
+      avgTurnaroundTime = totalTurnaroundTime / noOfProcesses;
+
+      addFieldsResult(noOfProcesses, ganttChart, A, avgWaitingTime, avgTurnaroundTime);
+    }
+
+    //ADD GANTT CHART & RESULTS TABLE
+    function addFieldsResult(n, ganttChart, A, avgWaitingTime, avgTurnaroundTime) {
+      // GANTT CHART TABLE
+      const ganttChartTitle = document.getElementById("ganttChartTitle");
+      const ganttDiv = document.getElementById("ganttChart");
+
+      // Gantt Chart Header Text
+      const ganttHeaderText = document.createElement("span");
+      ganttHeaderText.style.textAlign = 'center';
+      ganttHeaderText.style.display = 'block';
+      ganttHeaderText.style.marginBottom = '10px';
+      ganttHeaderText.style.fontWeight = '600';
+      ganttHeaderText.appendChild(document.createTextNode("Gantt Chart"));
+      // Process ID Table
+      const processTable = document.createElement("table");
+      processTable.classList.add('table-light');
+      processTable.classList.add('table-bordered');
+      processTable.style.marginBottom = '0';
+      processTable.style.marginLeft = '32px';
+      // Time Table
+      const timeTable = document.createElement("table");
+      timeTable.style.padding = '0';
+      timeTable.style.marginBottom = '0';
+
+      // Process ID Row
+      const processIDRow = document.createElement("tr");
+      for (let i = 0; i < ganttChart.length - 1; i++) {
+        const cell = document.createElement("td");
+        cell.appendChild(document.createTextNode(ganttChart[i].process));
+        cell.style.color = 'black';
+        cell.style.paddingTop = '0.6rem';
+        cell.style.width = '64px';
+        cell.classList.add('border-dark');
+        processIDRow.appendChild(cell);
+      }
+      // Time Row
+      const startTimeRow = document.createElement("tr");
+      for (let i = 0; i < ganttChart.length; i++) {
+        const cell = document.createElement("td");
+        cell.appendChild(document.createTextNode(ganttChart[i].startTime));
+        cell.style.backgroundColor = 'transparent';
+        cell.style.borderRadius = '0';
+        cell.style.width = '64px';
+        startTimeRow.appendChild(cell);
+      }
+
+      // Append rows to tables
+      processTable.appendChild(processIDRow);
+      timeTable.appendChild(startTimeRow);
+      // Append tables to the ganttDiv
+      ganttChartTitle.appendChild(ganttHeaderText);
+      ganttDiv.appendChild(processTable);
+      ganttDiv.appendChild(timeTable);
+
+      // RESULTS TABLE
+      const resultsDiv = document.getElementById("newFieldsResult");
       tbl = document.createElement('table');
       tbl.classList.add('table');
       tbl.classList.add('table-hover');
@@ -338,16 +499,16 @@
               td.appendChild(document.createTextNode(`Turnaround Time`));
               td.style.fontWeight = '600';
               td.style.borderTop = '0';
-            } else if (i!= n+1 && j === 0) {
-              td.appendChild(document.createTextNode(`${i}`));
-            }else if (j === 1) {
-              td.appendChild(document.createTextNode(`${arrivalTime[i-1]}`));
+            } else if (i != n+1 && j === 0) {
+              td.appendChild(document.createTextNode(`P${A[i-1].processId}`)); //P#
+            } else if (j === 1) {
+              td.appendChild(document.createTextNode(`${A[i-1].arrivalTime}`)); //AT
             } else if (j === 2) {
-              td.appendChild(document.createTextNode(`${burstTime[i-1]}`));
+              td.appendChild(document.createTextNode(`${A[i-1].burstTime}`)); //BT
             } else if (j === 3) {
-              td.appendChild(document.createTextNode(`WT for P${i}`)); //add computation of WT here
+              td.appendChild(document.createTextNode(`${A[i-1].waitingTime}`)); //WT
             } else if (j === 4) {
-              td.appendChild(document.createTextNode(`TT for P${i}`)); //add computation of TT here
+              td.appendChild(document.createTextNode(`${A[i-1].turnaroundTime}`)); //TT
             } else {
               td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
             }
@@ -362,9 +523,9 @@
               const td = tr.insertCell();
               td.style.color = 'black';
               if (j === 1) {
-                td.appendChild(document.createTextNode(`Ave WT`)); //add computation of AWT here
+                td.appendChild(document.createTextNode(`${avgWaitingTime.toFixed(2)}`)); //AWT
               } else if (j === 2) {
-                td.appendChild(document.createTextNode(`Ave TT`)); //add computation of ATT here
+                td.appendChild(document.createTextNode(`${avgTurnaroundTime.toFixed(2)}`)); //ATT
               } else {
               td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
               }
@@ -374,9 +535,11 @@
           }
         }
       }
-      div.appendChild(tbl);
+      resultsDiv.appendChild(tbl);
     }
     function removeFieldsResult() {
+      var ganttChart = document.getElementById('ganttChart')
+      ganttChart.innerHTML = '';
       var newFieldsResult = document.getElementById('newFieldsResult')
       newFieldsResult.innerHTML = '';
     }
