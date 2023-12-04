@@ -30,30 +30,30 @@
     <div class="card col-lg-5 col-sm-8">
       <div class="content-holder">
         <div class="mb-3 content" id="content-1" data-id='1'>
-          <label for="currentPosition" class="form-label">Input current position</label>
+          <label for="currentPosition" class="form-label">Input Current Position</label>
           <span class="errorSpan errCurrentPosition"></span>
           <input type="text" class="form-control" id="currentPosition" style="margin-bottom:10px;">
 
-          <label for="trackSize" class="form-label">Input track size</label>
+          <label for="trackSize" class="form-label">Input Track Size</label>
           <span class="errorSpan errTrackSize"></span>
           <input type="text" class="form-control" id="trackSize" style="margin-bottom:10px;">
 
-          <label for="seekRate" class="form-label">Input seek rate</label>
+          <label for="seekRate" class="form-label">Input Seek Rate</label>
           <span class="errorSpan errSeekRate"></span>
           <input type="text" class="form-control" id="seekRate" style="margin-bottom:10px;">
 
-          <label for="noOfRequest" class="form-label">Input number of request (Max of 10)</label>
+          <label for="noOfRequest" class="form-label">Input Number of Request (Max of 10)</label>
           <span class="errorSpan errNoOfRequest"></span>
           <input type="text" class="form-control" id="noOfRequest" style="margin-bottom:30px;">
         </div>
         
         <div class="mb-3 content" id="content-2" data-id='2'>
-          <label for="arrivalTime" class="form-label">Input individual arrival time</label>
+          <label for="arrivalTime" class="form-label">Input Individual Arrival Time</label>
           <div id="newFieldsRequest"></div>
         </div>
         
         <div class="mb-3 content" id="content-3" data-id='3'>
-          <label for="alpha" class="form-label">Input alpha</label>
+          <label for="alpha" class="form-label">Input Alpha</label>
           <span class="errorSpan errAlpha"></span>
           <input type="text" class="form-control" id="alpha" style="margin-bottom:30px;">
         </div>
@@ -105,34 +105,34 @@
           var errCount= 0;
         
           if(currentPosition=="") {
-            errCurrentPosition.text('This field is required');
+            errCurrentPosition.text('This Field is Required');
             errCount++;
           } else if (isNaN(currentPosition)) {
-            errCurrentPosition.text('Must be a number');
+            errCurrentPosition.text('Must be a Number');
             errCount++;
           }
 
           if(trackSize=="") {
-            errTrackSize.text('This field is required');
+            errTrackSize.text('This Field is Required');
             errCount++;
           } else if (isNaN(trackSize)) {
-            errTrackSize.text('Must be a number');
+            errTrackSize.text('Must be a Number');
             errCount++;
           }
 
           if(seekRate=="") {
-            errSeekRate.text('This field is required');
+            errSeekRate.text('This Field is Required');
             errCount++;
           } else if (isNaN(seekRate)) {
-            errSeekRate.text('Must be a number');
+            errSeekRate.text('Must be a Number');
             errCount++;
           }
 
           if(noOfRequest=="") {
-            errNoOfRequest.text('This field is required');
+            errNoOfRequest.text('This Field is Required');
             errCount++;
           } else if((noOfRequest%1 != 0) || noOfRequest>10) {
-            errNoOfRequest.text('Must be less than integer 10');
+            errNoOfRequest.text('Must be Less than Integer 10');
             errCount++;
           }
 
@@ -156,9 +156,9 @@
           alpha = document.getElementById('alpha').value;
           var errAlpha = $('#alpha').parent().find('.errAlpha');
           if(alpha=="") {
-            errAlpha.text('This field is required');
+            errAlpha.text('This Field is Required');
           } else if (isNaN(alpha)) {
-            errAlpha.text('Must be a number');
+            errAlpha.text('Must be a Number');
           } else {
             counter++;
             $('#content-3').hide();
@@ -270,10 +270,10 @@
         requests[i] = document.getElementById('request'+(i+1)).value;
         var errorSpan = $('#request'+(i+1)).parent().find('.errorSpanRequest'+(i+1));
         if(requests[i]=="") {
-          errorSpan.text('This field is required');
+          errorSpan.text('This Field is Required');
           errRequestsCount++;
         } else if(isNaN(requests[i]+"")){
-          errorSpan.text('Must be a number');
+          errorSpan.text('Must be a Number');
           errRequestsCount++;
         } else {
           errorSpan.text('');

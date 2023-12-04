@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SJF Scheduling</title>
+  <link rel="icon" type="image/x-icon" href="logo.png">
 
   <!--Bootstrap CSS CDN-->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -30,18 +31,18 @@
     <div class="card col-lg-5 col-sm-8">
       <div class="content-holder">
         <div class="mb-3 content" id="content-1" data-id='1'>
-          <label for="noOfProcesses" class="form-label">Input no. of processes (2-9)</label>
+          <label for="noOfProcesses" class="form-label">Input No. of Processes (2-9)</label>
           <span class="errorSpan"></span>
           <input type="text" class="form-control" id="noOfProcesses">
         </div>
         
         <div class="mb-3 content" id="content-2" data-id='2'>
-          <label for="arrivalTime" class="form-label">Input individual arrival time</label>
+          <label for="arrivalTime" class="form-label">Input Individual Arrival Time</label>
           <div id="newFieldsAT"></div>
         </div>
         
         <div class="mb-3 content" id="content-3" data-id='3'>
-          <label for="burstTime" class="form-label">Input individual burst time</label>
+          <label for="burstTime" class="form-label">Input Individual Burst Time</label>
           <div id="newFieldsBT"></div>
         </div>
         <button type="button" class="btn btn-secondary back" style="float:left;">Back</button>
@@ -90,9 +91,9 @@
           console.log(noOfProcesses);
           console.log(noOfProcesses%1 != 0);
           if(noOfProcesses=="") {
-            errorSpan.text('This field is required');
+            errorSpan.text('This Field is Required');
           } else if((noOfProcesses%1 != 0) || (noOfProcesses<2 || noOfProcesses>9)){
-            errorSpan.text('Must be from integer 2 to 9');
+            errorSpan.text('Must be from Integer 2 to 9');
           } else { //correct info
             counter++;
             $('#content-1').hide();
@@ -204,13 +205,13 @@
         arrivalTime[i] = document.getElementById('arrivalTime'+(i+1)).value;
         var errorSpan = $('#arrivalTime'+(i+1)).parent().find('.errorSpanAT'+(i+1));
         if(arrivalTime[i]=="") {
-          errorSpan.text('This field is required');
+          errorSpan.text('This Field is Required');
           ErrATCount++;
         } else if(isNaN(arrivalTime[i]+"")){
-          errorSpan.text('Must be a number');
+          errorSpan.text('Must be a Number');
           ErrATCount++;
         } else if((arrivalTime[i]%1 != 0)) {
-          errorSpan.text('Must be an integer');
+          errorSpan.text('Must be an Integer');
           ErrATCount++;
         } else {
           errorSpan.text('');
@@ -266,16 +267,16 @@
         burstTime[i] = document.getElementById('burstTime'+(i+1)).value;
         var errorSpan = $('#burstTime'+(i+1)).parent().find('.errorSpanBT'+(i+1));
         if(burstTime[i]=="") {
-          errorSpan.text('This field is required');
+          errorSpan.text('This Field is Required');
           ErrBTCount++;
         } else if(isNaN(burstTime[i]+"")){
-          errorSpan.text('Must be a number');
+          errorSpan.text('Must be a Number');
           ErrBTCount++;
         } else if((burstTime[i]%1 != 0)) {
-          errorSpan.text('Must be an integer');
+          errorSpan.text('Must be an Integer');
           ErrBTCount++;
         } else if((burstTime[i] == 0)) {
-          errorSpan.text('Burst time can not be 0');
+          errorSpan.text('Burst Time can not be 0');
           ErrBTCount++;
         } else {
           errorSpan.text('');

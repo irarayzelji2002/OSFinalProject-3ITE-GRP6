@@ -5,6 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SJF Scheduling</title>
+  <link rel="icon" type="image/x-icon" href="logo.png">
 
   <!--Bootstrap CSS CDN-->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -29,7 +30,7 @@
     <div id="inputSection">
       <form id="inputForm">
         <div class="form-group">
-          <label for="noOfProcesses">Enter the number of processes:</label>
+          <label for="noOfProcesses">Enter the Number of Processes:</label>
           <input type="number" class="form-control" id="noOfProcesses" min="2" max="9" required oninput="errorMessage()">
           <div id="error" class="text-danger"></div>
         </div>
@@ -47,7 +48,7 @@
       
             if (isNaN(noOfProcesses) || noOfProcesses < 2 || noOfProcesses > 9) {
               // Display error message
-              error.textContent = "Please enter a valid number between 2 and 9";
+              error.textContent = "Please Enter a Valid Number Between 2 and 9";
               error.style.color = "red";
               // Disable form submission
               document.getElementById("submitBtn").disabled = true;
