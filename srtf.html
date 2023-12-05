@@ -169,6 +169,7 @@
     var input = $('<input type="text" class="form-control" style="margin-bottom:10px;"/>');
     newFieldsAT = $('');
     newFieldsBT = $('');
+
     //ADDING, REMOVING< VALIDATING AT FIELDS
     function addFieldsAT(n) {
       for (i = newFieldsAT.length; i < n; i++) {
@@ -301,6 +302,9 @@
       var tbody = tbl.createTBody();
       var tfoot;
       var tr;
+      var result = {};
+      result = calculateSRTF(arrivalTime, burstTime)
+      console.log(result);
       for (let i = 0; i < (n+2); i++) {
         if(i === 0) {
           thead = tbl.createTHead();
@@ -313,7 +317,7 @@
           tfoot = tbl.createTFoot();
           tr = tfoot.insertRow();
         }
-        
+
         for (let j = 0; j < 5; j++) {
           
           if (i < n+1) {
@@ -342,13 +346,13 @@
             } else if (i!= n+1 && j === 0) {
               td.appendChild(document.createTextNode(`${i}`));
             }else if (j === 1) {
-              td.appendChild(document.createTextNode(`${arrivalTime[i-1]}`));
+              td.appendChild(document.createTextNode(`${arrivalTime[i-1]}`))             
             } else if (j === 2) {
               td.appendChild(document.createTextNode(`${burstTime[i-1]}`));
-            } else if (j === 3) {
-              td.appendChild(document.createTextNode(`WT for P${i}`)); //add computation of WT here
+            } else if (j === 3) {  
+              td.appendChild(document.createTextNode(`${result.waitingTime[i-1]}`)); //add computation of WT here
             } else if (j === 4) {
-              td.appendChild(document.createTextNode(`TT for P${i}`)); //add computation of TT here
+              td.appendChild(document.createTextNode(`${result.turnaroundTime[i-1]}`)); //add computation of TT here
             } else {
               td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
             }
@@ -363,9 +367,9 @@
               const td = tr.insertCell();
               td.style.color = 'black';
               if (j === 1) {
-                td.appendChild(document.createTextNode(`Ave WT`)); //add computation of AWT here
+                td.appendChild(document.createTextNode(`${result.aveWT}`)); //add computation of AWT here
               } else if (j === 2) {
-                td.appendChild(document.createTextNode(`Ave TT`)); //add computation of ATT here
+                td.appendChild(document.createTextNode(`${result.aveTT}`)); //add computation of ATT here
               } else {
               td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
               }
@@ -377,10 +381,80 @@
       }
       div.appendChild(tbl);
     }
+
     function removeFieldsResult() {
       var newFieldsResult = document.getElementById('newFieldsResult')
       newFieldsResult.innerHTML = '';
     }
+
+    function calculateSRTF(arrivalTime, burstTime) {
+      const n = arrivalTime.length;
+        const remainingTime = [...burstTime];
+        const completionTime = new Array(n).fill(0);
+        const processSequence = [];
+        let currentTime = 0;
+        let completed = 0;
+
+        while (completed !== n) {
+          let shortestProcess = -1;
+          let shortestTime = Number.MAX_SAFE_INTEGER;
+
+        for (let i = 0; i < n; i++) {
+          if (arrivalTime[i] <= currentTime && remainingTime[i] < shortestTime && remainingTime[i] > 0) {
+            shortestTime = remainingTime[i];
+            shortestProcess = i;
+          }
+        } 
+
+          if (shortestProcess === -1) {
+            currentTime++;
+            continue;
+        }
+
+        processSequence.push(shortestProcess + 1);
+        remainingTime[shortestProcess]--;
+
+        if (remainingTime[shortestProcess] === 0) {
+          completed++;
+          completionTime[shortestProcess] = currentTime + 1;
+        }
+
+        currentTime++;
+      }
+
+  // Calculate waiting time and turnaround time
+  const waitingTime = [];
+  const turnaroundTime = [];
+  let aveWT = 0;
+  let aveTT = 0;
+
+  for (let i = 0; i < n; i++) {
+    turnaroundTime[i] = completionTime[i] - arrivalTime[i];
+    waitingTime[i] = turnaroundTime[i] - burstTime[i];
+    aveWT = aveWT + waitingTime[i]
+    aveTT = aveTT + turnaroundTime[i]
+         
+  }
+
+  aveWT = aveWT / n;
+  aveTT = aveTT / n;
+
+  // Log the sequence and computed times
+  console.log("Waiting Time:", waitingTime);
+  console.log("Turnaround Time:", turnaroundTime);
+  console.log("Average Waiting Time:", aveWT);
+  console.log("Turnaround Time:", aveTT);
+  
+
+  return {
+    waitingTime, 
+    turnaroundTime,
+    aveWT,
+    aveTT
+  }
+    }
+    
+
   </script>
 </body>
 </html>
