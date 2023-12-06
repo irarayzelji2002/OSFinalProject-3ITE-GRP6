@@ -269,6 +269,12 @@
         } else if(isNaN(burstTime[i]+"")){
           errorSpan.text('Must be a Number');
           ErrBTCount++;
+        } else if((burstTime[i]%1 != 0)) {
+          errorSpan.text('Must be an Integer');
+          ErrBTCount++;
+        } else if((burstTime[i] == 0)) {
+          errorSpan.text('Burst Time can not be 0');
+          ErrBTCount++;
         } else {
           errorSpan.text('');
         }
