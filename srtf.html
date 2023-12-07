@@ -82,36 +82,34 @@
         var newFieldsAT;
         var newFieldsBT;
 
-        //VALIDATE BEFORE GOING TO NEXT
-        if(counter==1) {
-          $('#content-1').show();
-          noOfProcesses = document.getElementById('noOfProcesses').value;
-          var errorSpan = $('#noOfProcesses').parent().find('.errorSpan');
-          console.log(noOfProcesses);
-          console.log(noOfProcesses%1 != 0);
-          if(noOfProcesses=="") {
-            errorSpan.text('This field is Required');
-          } else if((noOfProcesses%1 != 0) || (noOfProcesses<2 || noOfProcesses>9)){
-            errorSpan.text('Must be from Integer 2 to 9');
-          } else { //correct info
-            counter++;
-            $('#content-1').hide();
+        // VALIDATE BEFORE GOING TO NEXT
+          if (counter == 1) {
+            $('#content-1').show();
+            noOfProcesses = document.getElementById('noOfProcesses').value;
+            var errorSpan = $('#noOfProcesses').parent().find('.errorSpan');
+            
+            if (noOfProcesses == "") {
+              errorSpan.text('This Field is Required');
+            } else if (isNaN(noOfProcesses) || !isFinite(noOfProcesses) || (noOfProcesses % 1 != 0) || (noOfProcesses < 2 || noOfProcesses > 9)) {
+              errorSpan.text('Must be an Integer from 2 to 9');
+            } else { // Correct info
+              counter++;
+              $('#content-1').hide();
+              $('#content-2').show();
+              $('.back').show();
+              addFieldsAT(noOfProcesses);
+            }
+          } else if (counter == 2) {
             $('#content-2').show();
             $('.back').show();
-            addFieldsAT(noOfProcesses);
+
+            validateAT();
+          } else if (counter == 3) {
+            $('#content-3').show();
+            $('.back').show();
+
+            validateBT();
           }
-        } else if(counter==2) {
-          $('#content-2').show();
-          $('.back').show();
-          
-          validateAT();
-          
-        } else if(counter==3) {
-          $('#content-3').show();
-          $('.back').show();
-          
-          validateBT();
-        }
         
         //SRTF COMPUTATION & RESULT
         if(counter > 3) {
@@ -461,6 +459,22 @@
     }
     
 
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const noOfProcessesInput = document.getElementById('noOfProcesses');
+      const errorSpan = document.querySelector('.errorSpan');
+
+      noOfProcessesInput.addEventListener('input', function () {
+        const inputValue = parseInt(noOfProcessesInput.value, 10);
+
+        if (isNaN(inputValue) || inputValue < 2 || inputValue > 9) {
+          errorSpan.textContent = 'Please Enter a Number Between 2 and 9.';
+        } else {
+          errorSpan.textContent = '';
+        }
+      });
+    });
   </script>
 </body>
 </html>

@@ -263,25 +263,29 @@
         burstTime = [n+1];
       }
       
-      for (i = 0; i < n ; i++) {
-        burstTime[i] = document.getElementById('burstTime'+(i+1)).value;
-        var errorSpan = $('#burstTime'+(i+1)).parent().find('.errorSpanBT'+(i+1));
-        if(burstTime[i]=="") {
-          errorSpan.text('This Field is Required');
+      for (let i = 0; i < n; i++) {
+        burstTime[i] = document.getElementById('burstTime' + (i + 1)).value;
+          const errorSpan = $('#burstTime' + (i + 1)).parent().find('.errorSpanBT' + (i + 1));
+
+      if (burstTime[i] === "") {
+        errorSpan.text('This Field is Required');
           ErrBTCount++;
-        } else if(isNaN(burstTime[i]+"")){
-          errorSpan.text('Must be a Number');
+      } else if (isNaN(burstTime[i]) || !isFinite(burstTime[i])) {
+        errorSpan.text('Must be a valid number');
           ErrBTCount++;
-        } else if((burstTime[i]%1 != 0)) {
-          errorSpan.text('Must be an Integer');
+      } else if (!Number.isInteger(parseFloat(burstTime[i]))) {
+        errorSpan.text('Must be an Integer');
           ErrBTCount++;
-        } else if((burstTime[i] == 0)) {
-          errorSpan.text('Burst Time can not be 0');
+      } else if (parseInt(burstTime[i], 10) === 0) {
+        errorSpan.text('Burst Time cannot be 0');
           ErrBTCount++;
-        } else {
-          errorSpan.text('');
-        }
-      }
+      } else if (parseInt(burstTime[i], 10) < 0) {
+        errorSpan.text('Burst Time cannot be negative');
+          ErrBTCount++;
+      } else {
+        errorSpan.text('');
+    }
+  }
 
       if(ErrBTCount == 0){ //correct info
         counter++;
@@ -544,6 +548,22 @@
       var newFieldsResult = document.getElementById('newFieldsResult')
       newFieldsResult.innerHTML = '';
     }
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const noOfProcessesInput = document.getElementById('noOfProcesses');
+      const errorSpan = document.querySelector('.errorSpan');
+
+      noOfProcessesInput.addEventListener('input', function () {
+        const inputValue = parseInt(noOfProcessesInput.value, 10);
+
+        if (isNaN(inputValue) || inputValue < 2 || inputValue > 9) {
+          errorSpan.textContent = 'Please Enter a Number Between 2 and 9.';
+        } else {
+          errorSpan.textContent = '';
+        }
+      });
+    });
   </script>
 </body>
 </html>
