@@ -371,9 +371,9 @@
               const td = tr.insertCell();
               td.style.color = 'black';
               if (j === 1) {
-                td.appendChild(document.createTextNode(`${result.aveWT}`)); //add computation of AWT here
+                td.appendChild(document.createTextNode(`${result.aveWT.toFixed(2)}`)); //add computation of AWT here
               } else if (j === 2) {
-                td.appendChild(document.createTextNode(`${result.aveTT}`)); //add computation of ATT here
+                td.appendChild(document.createTextNode(`${result.aveTT.toFixed(2)}`)); //add computation of ATT here
               } else {
               td.appendChild(document.createTextNode(`Cell I${i}/J${j}`));
               }

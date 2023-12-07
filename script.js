@@ -72,7 +72,7 @@ $('body').on('click', '.next', function () {
     $('#content-2').show();
     $('.back').show();
 
-    validateRequest();
+    validateRequest(currentPosition);
 
   } else if (counter == 3) {
     $('#content-3').show();
@@ -182,7 +182,7 @@ function removeFieldsRequest() {
   newFieldsRequest = newFieldsRequest.not(removeField);
 }
 
-function validateRequest() {
+function validateRequest(currentPosition) {
   var n = ((newFieldsRequest.length) / 3);
   console.log('is empty: ' + !requests.length);
   errRequestsCount = 0;
@@ -191,14 +191,20 @@ function validateRequest() {
     requests = new Array(n);
   }
 
+  // Find the index where the current position is located in the sorted requests
+  var currentIndex = requests.findIndex(request => request >= currentPosition);
+
   for (i = 0; i < n; i++) {
-    requests[i] = document.getElementById('request' + (i + 1)).value;
+    requests[i] = parseInt(document.getElementById('request' + (i + 1)).value);
     var errorSpan = $('#request' + (i + 1)).parent().find('.errorSpanRequest' + (i + 1));
     if (requests[i] == "") {
       errorSpan.text('This Field is Required');
       errRequestsCount++;
     } else if (isNaN(requests[i] + "")) {
       errorSpan.text('Must be a Number');
+      errRequestsCount++;
+    } else if (currentIndex === -1) {
+      errorSpan.text('Current position is greater than or equal to all requests');
       errRequestsCount++;
     } else {
       errorSpan.text('');
